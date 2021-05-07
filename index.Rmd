@@ -1,0 +1,55 @@
+---
+title: "Developing Data products: Project 2"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output:
+  html_document:
+    date: "`r format(Sys.time(), '%d %B, %Y')`"
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+      number_section: true
+      code_folding: hide
+    # md_document:
+    # variant: markdown_github
+---
+
+# Total cases of COVID-19 in some countries
+
+```{r setup, include=FALSE,echo=FALSE,warning=FALSE}
+rm(list = ls(all.names = TRUE))
+cat('\14')
+set.seed(299792458)
+library(data.table)
+library(plotly)
+library(corrplot)
+library(DT)
+library(leaflet)
+library(lubridate)
+```
+
+
+
+```{r map,echo=FALSE,warning=FALSE}
+covid_data = fread("D:\\1_Studies\\R and related subjects\\Coursera 1\\ProjectWork\\DevelopingDataProducts\\Project2\\time_series_covid19_confirmed_global.csv")
+covid_data = covid_data[,-c(1,3,4)]
+
+covid_data = covid_data[, lapply(.SD,sum),by=.(`Country/Region`)]
+cnm = covid_data$`Country/Region`
+covid_data$`Country/Region` = NULL
+Dates = colnames(covid_data)
+covid_data = data.table(t(covid_data))
+colnames(covid_data) = cnm
+Dates = mdy(Dates)
+covid_data = cbind(Dates,covid_data)
+p = plot_ly(data = covid_data,x = ~Dates,y = ~India, name = "India",
+            type = 'scatter', mode = 'lines',
+            line = list(color = 'rgb(205, 12, 24)', width = 4)) %>%
+  add_trace(y = ~Brazil, name = "Brazil",line = list(color = 'rgb(22, 96, 167)',
+                                                     width = 4)) %>%
+  add_trace(y = ~US, name = "US",line = list(color = 'rgb(205, 12, 24)', 
+                                             width = 4, dash = 'dash')) %>%
+  layout(xaxis = list(title = "Dates"),
+         yaxis = list (title = "Number of Infected"))
+p
+```
